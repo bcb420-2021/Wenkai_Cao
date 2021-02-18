@@ -1,0 +1,49 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+Get and normalize microarry dataset 
+
+```{}
+#a package that make querying the metadata describing microarray experiments,platforms, and datasets easier. Especially for R users.
+if (!requireNamespace("BiocManager", quietly = TRUE))    
+  install.packages("BiocManager")
+if (!requireNamespace("GEOmetadb", quietly = TRUE))    
+  BiocManager::install("GEOmetadb")
+# we need to do is get the meta data.
+if(!file.exists('GEOmetadb.sqlite')) 
+  GEOmetadb::getSQLiteFile()
+if (!"BiocManager" %in% rownames(installed.packages()))
+  install.packages("BiocManager")
+BiocManager::install(c("affy", "limma"), dependencies=TRUE)
+# can not open cell.gz file 
+
+BiocManager::install("affyio")
+# get data to analysis for alzihemer 
+sfiles = GEOquery::getGEOSuppFiles('GSE53890')
+
+
+
+
+# unzip the data and find cel.gz
+untar("GSE53890/GSE53890_RAW.tar", exdir = "GSE53890/CEL")
+f <- list.files("GSE53890/CEL",full.names = TRUE)
+table(sapply(f, function(x) affyio::read.celfile.header(x)$cdfName))
+celData<-affyio::read.celfile(f[1])
+
+library(affy)   # Affymetrix pre-processing
+library(limma)
+
+affy.data = ReadAffy(filenames = f)
+eset.mas5 = mas5(affy.data)
+dir_cels='GSE53890/CEL'
+affy_data = ReadAffy(celfile.path=dir_cels)
+eset.mas5 = mas5(affy_data)
+
+
+```
+
+
